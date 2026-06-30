@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.tdd/foresight/
+*.json.bak
+
+# local session/editor state — never publish
+.remember/
+pytest-cache-files-*/
+.claude/

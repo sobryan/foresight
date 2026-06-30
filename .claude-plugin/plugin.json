@@ -1,0 +1,21 @@
+{
+  "name": "foresight",
+  "version": "0.1.0",
+  "description": "Forward-looking companion to hindsight: explores the product (code, docs, and the running web/Android/iOS app) to discover regressions that haven't been written yet, validates that existing regression plans are replayable and sound, and organizes them into prioritized feature groups for hindsight.",
+  "author": {
+    "name": "Sean",
+    "email": "stobryan@gmail.com"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/sobryan/foresight",
+  "claudeCodeMinVersion": "1.0.0",
+  "keywords": [
+    "regression",
+    "coverage",
+    "tdd",
+    "exploration",
+    "e2e",
+    "audit",
+    "hindsight"
+  ]
+}

@@ -1,0 +1,15 @@
+# foresight — Python requirements
+#
+# The deterministic core (scripts/foresight.py) uses ONLY the Python standard
+# library, by design — it must run anywhere hindsight.py runs, including CI,
+# with nothing to install. So there are no runtime dependencies here.
+#
+# Live app exploration is performed by the plugin's sub-agents using the agent
+# runtime's tools and EXTERNAL CLIs that are not Python packages and are not
+# installed via pip:
+#   - Web      : the Claude-in-Chrome browser tools (provided by the runtime)
+#   - Android  : Maestro or Appium, plus `adb` + an emulator/device
+#   - iOS      : Maestro or Appium, plus Xcode's `xcrun simctl` (macOS)
+#
+# Development / running the test suite only:
+#   pytest>=7

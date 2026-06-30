@@ -1,0 +1,17 @@
+{
+  "name": "foresight-marketplace",
+  "owner": {
+    "name": "Sean",
+    "email": "stobryan@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "foresight",
+      "source": "./",
+      "description": "Discovers regressions you haven't written yet and validates the ones you have. Reads code + docs, explores the running web/Android/iOS app with screenshots, maps UI elements and use cases to tests, audits existing .tdd/regression entries for replayability, and organizes them into prioritized feature groups that hindsight can consume.",
+      "version": "0.1.0",
+      "category": "engineering",
+      "tags": ["regression", "coverage", "tdd", "exploration", "e2e", "audit"]
+    }
+  ]
+}
