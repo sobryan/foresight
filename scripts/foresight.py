@@ -677,6 +677,215 @@ def cmd_coverage(args) -> int:
 
 
 # ---------------------------------------------------------------------------
+# CATALOG  (render UI-element + user-story catalog into inventory.md)
+# ---------------------------------------------------------------------------
+
+_CATALOG_START = "<!-- foresight:catalog:start -->"
+_CATALOG_END   = "<!-- foresight:catalog:end -->"
+
+
+def _element_completeness(el: dict) -> list:
+    """Return list of missing field names among user_story, source_refs, screenshot."""
+    missing: list = []
+    if not el.get("user_story"):
+        missing.append("user_story")
+    if not el.get("source_refs"):
+        missing.append("source_refs")
+    if not (el.get("visual") or {}).get("screenshot"):
+        missing.append("screenshot")
+    return missing
+
+
+def build_catalog(project: Path) -> dict:
+    """Build the UI element catalog from inventory.json. Never writes files."""
+    inv = _read_json(_foresight_root(project) / "inventory" / "inventory.json")
+
+    _empty_summary = {
+        "n_features": 0, "n_elements": 0, "n_use_cases": 0,
+        "n_with_story": 0, "n_with_source_refs": 0, "n_with_screenshot": 0,
+        "n_complete": 0, "n_incomplete": 0, "completeness_pct": 100,
+    }
+
+    if not (isinstance(inv, dict) and inv.get("features")):
+        return {
+            "generated_at_iso": _now_iso(),
+            "project": str(project),
+            "inventory_present": False,
+            "summary": _empty_summary,
+            "records": [],
+            "incomplete": [],
+        }
+
+    records: list = []
+    n_features = 0
+    n_use_cases = 0
+    n_with_story = 0
+    n_with_source_refs = 0
+    n_with_screenshot = 0
+    n_complete = 0
+    n_incomplete = 0
+
+    for feature in inv["features"]:
+        n_features += 1
+        n_use_cases += len(feature.get("use_cases", []))
+        for el in feature.get("ui_elements", []):
+            missing = _element_completeness(el)
+            record = {
+                "id": el.get("id", ""),
+                "feature": feature.get("id", feature.get("name", "")),
+                "selector": el.get("selector", ""),
+                "role": el.get("role", ""),
+                "behavior": el.get("behavior", ""),
+                "use_case": el.get("use_case", ""),
+                "user_story": el.get("user_story", ""),
+                "source_refs": el.get("source_refs") or [],
+                "screenshot": (el.get("visual") or {}).get("screenshot", ""),
+                "region": (el.get("visual") or {}).get("region"),
+                "label": (el.get("visual") or {}).get("label", ""),
+                "missing": missing,
+            }
+            records.append(record)
+            if el.get("user_story"):
+                n_with_story += 1
+            if el.get("source_refs"):
+                n_with_source_refs += 1
+            if (el.get("visual") or {}).get("screenshot"):
+                n_with_screenshot += 1
+            if missing:
+                n_incomplete += 1
+            else:
+                n_complete += 1
+
+    n_elements = len(records)
+    completeness_pct = round(100 * n_complete / n_elements, 1) if n_elements else 100
+
+    return {
+        "generated_at_iso": _now_iso(),
+        "project": str(project),
+        "inventory_present": True,
+        "summary": {
+            "n_features": n_features,
+            "n_elements": n_elements,
+            "n_use_cases": n_use_cases,
+            "n_with_story": n_with_story,
+            "n_with_source_refs": n_with_source_refs,
+            "n_with_screenshot": n_with_screenshot,
+            "n_complete": n_complete,
+            "n_incomplete": n_incomplete,
+            "completeness_pct": completeness_pct,
+        },
+        "records": records,
+        "incomplete": [r for r in records if r["missing"]],
+    }
+
+
+def _catalog_markdown_section(cat: dict) -> str:
+    """Render the UI element catalog as a markdown section string (no timestamp — deterministic)."""
+    s = cat["summary"]
+    n_el = s["n_elements"]
+    n_feat = s["n_features"]
+    n_comp = s["n_complete"]
+    pct = s["completeness_pct"]
+
+    out = ["## UI element catalog", ""]
+    out.append(f"{n_el} elements across {n_feat} features — {n_comp} complete ({pct}%)")
+    out += ["", "### Documentation completeness", ""]
+
+    incomplete = cat.get("incomplete", [])
+    if incomplete:
+        out.append("The following elements are missing documentation:")
+        out.append("")
+        for r in incomplete:
+            out.append(f"- `{r['id']}` (`{r['feature']}`): missing {', '.join(r['missing'])}")
+    else:
+        out.append(f"All {n_el} elements are fully documented.")
+
+    out += ["", "### Elements by feature", ""]
+
+    records = cat.get("records", [])
+    seen_features: list = []
+    feature_records: dict = {}
+    for r in records:
+        feat = r["feature"]
+        if feat not in feature_records:
+            seen_features.append(feat)
+            feature_records[feat] = []
+        feature_records[feat].append(r)
+
+    for feat in seen_features:
+        out += [f"#### {feat}", ""]
+        for r in feature_records[feat]:
+            out.append(f"##### {r['id']} — {r['role']} {r['selector']}")
+            out.append("")
+            story = r.get("user_story") or ""
+            out.append(f"> {story}" if story else "> *(no user story)*")
+            out.append("")
+            shot = r.get("screenshot") or ""
+            label = r.get("label") or ""
+            if shot:
+                out.append(f"![{label}]({shot})")
+            else:
+                out.append("*(no screenshot)*")
+            out.append("")
+            refs = r.get("source_refs") or []
+            if refs:
+                out.append("Sources: " + ", ".join(f"`{ref}`" for ref in refs))
+            else:
+                out.append("*(no source refs)*")
+            out.append("")
+            out.append("---")
+            out.append("")
+
+    return "\n".join(out)
+
+
+def _inject_catalog_section(md_path: Path, section: str) -> None:
+    """Inject section between idempotent HTML comment markers (create file if absent)."""
+    block = _CATALOG_START + "\n" + section.rstrip("\n") + "\n" + _CATALOG_END
+
+    if md_path.exists():
+        existing = md_path.read_text()
+        if _CATALOG_START in existing:
+            new_content = re.sub(
+                r"<!-- foresight:catalog:start -->.*?<!-- foresight:catalog:end -->",
+                block,
+                existing,
+                flags=re.DOTALL,
+            )
+        else:
+            new_content = existing.rstrip("\n") + "\n\n" + block
+    else:
+        new_content = block
+
+    _write_text(md_path, new_content)
+
+
+def cmd_catalog(args) -> int:
+    projects = resolve_projects(args)
+    any_incomplete = False
+    for project in projects:
+        cat = build_catalog(project)
+        md_path = _foresight_root(project) / "inventory" / "inventory.md"
+        section = _catalog_markdown_section(cat)
+        _inject_catalog_section(md_path, section)
+        if args.json:
+            print(json.dumps(cat, indent=2))
+        else:
+            s = cat["summary"]
+            if not cat["inventory_present"]:
+                print(f"{project.name}: no inventory — skipped")
+            else:
+                print(f"{project.name}: {s['n_elements']} elements, "
+                      f"{s['completeness_pct']}% complete "
+                      f"({s['n_incomplete']} incomplete)")
+        if cat["incomplete"]:
+            any_incomplete = True
+    if args.fail_on_incomplete and any_incomplete:
+        return 1
+    return 0
+
+
+# ---------------------------------------------------------------------------
 # REORG  (FR-5 — propose & optionally apply priority/feature/serial)
 # ---------------------------------------------------------------------------
 
@@ -864,8 +1073,16 @@ def cmd_report(args) -> int:
         audit = _read_json(root / "audit" / "audit.json")
         cov = _read_json(root / "coverage" / "coverage.json")
         reorg = _read_json(root / "reorg" / "reorg.json")
-        proposals = sorted(p.name for p in (root / "proposals").glob("*") if p.is_dir())
-        explorations = sorted(p.name for p in (root / "exploration").glob("*") if p.is_dir())
+        _prop_dir = root / "proposals"
+        _expl_dir = root / "exploration"
+        proposals = sorted(
+            p.name for p in (_prop_dir.glob("*") if _prop_dir.exists() else [])
+            if p.is_dir()
+        )
+        explorations = sorted(
+            p.name for p in (_expl_dir.glob("*") if _expl_dir.exists() else [])
+            if p.is_dir()
+        )
 
         out = [f"# foresight report — {project.name}", "",
                f"Generated: {_now_iso()}", ""]
@@ -904,6 +1121,17 @@ def cmd_report(args) -> int:
         else:
             out.append("- none yet — `/foresight-propose`")
 
+        out += ["", "## UI catalog", ""]
+        cat = build_catalog(project)
+        s_cat = cat["summary"]
+        if s_cat["n_elements"] == 0:
+            out.append("- not enriched yet — run the visual pass + `foresight.py catalog`")
+        else:
+            out.append(f"- {s_cat['n_elements']} elements, {s_cat['completeness_pct']}% complete")
+            top_incomplete = cat["incomplete"][:5]
+            for r in top_incomplete:
+                out.append(f"  - `{r['id']}` missing: {', '.join(r['missing'])}")
+
         _write_text(root / "report.md", "\n".join(out))
         print(f"wrote {root / 'report.md'}")
     return 0
@@ -940,6 +1168,14 @@ def build_parser() -> argparse.ArgumentParser:
     p_cov.add_argument("--fail-on-gap", action="store_true",
                        help="exit non-zero if any high-risk (>=5) gap is uncovered")
     p_cov.set_defaults(func=cmd_coverage)
+
+    p_cat = sub.add_parser("catalog",
+                            help="render the UI-element + user-story catalog into inventory.md")
+    _add_project_args(p_cat)
+    p_cat.add_argument("--json", action="store_true", help="emit JSON to stdout")
+    p_cat.add_argument("--fail-on-incomplete", action="store_true",
+                       help="exit non-zero if any UI element lacks a story / source_refs / screenshot")
+    p_cat.set_defaults(func=cmd_catalog)
 
     p_reorg = sub.add_parser("reorg", help="propose/apply priority+feature grouping")
     _add_project_args(p_reorg)
