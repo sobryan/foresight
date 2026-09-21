@@ -1,0 +1,112 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "foresight audit.json \u2014 corpus verdicts",
+  "type": "object",
+  "required": [
+    "generated_at_iso",
+    "projects",
+    "n_entries",
+    "n_not_replayable",
+    "n_error_findings",
+    "n_warning_findings",
+    "health_score",
+    "entries"
+  ],
+  "properties": {
+    "generated_at_iso": {
+      "type": "string"
+    },
+    "projects": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "n_entries": {
+      "type": "integer"
+    },
+    "n_not_replayable": {
+      "type": "integer"
+    },
+    "n_error_findings": {
+      "type": "integer"
+    },
+    "n_warning_findings": {
+      "type": "integer"
+    },
+    "health_score": {
+      "type": "integer"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "slug",
+          "project",
+          "priority",
+          "features",
+          "replayable",
+          "n_tests",
+          "findings"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "project": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "critical",
+              "high",
+              "normal",
+              "low"
+            ]
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "replayable": {
+            "type": "boolean"
+          },
+          "n_tests": {
+            "type": "integer"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "severity",
+                "message"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "error",
+                    "warning",
+                    "info"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

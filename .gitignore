@@ -1,7 +1,11 @@
 __pycache__/
 *.pyc
 .pytest_cache/
-.tdd/
+# .tdd/regression/ is the versioned regression corpus (foresight audits it in CI);
+# sessions and foresight's own output stay local.
+.tdd/sessions/
+.tdd/foresight/
+.tdd/regression/*/runs/
 *.json.bak
 
 # local session/editor state — never publish

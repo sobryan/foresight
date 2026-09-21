@@ -1,0 +1,69 @@
+{
+  "slug": "add-a-deterministic-catalog-subcommand-to-scripts-foresight",
+  "saved_at_iso": "2026-07-01T00:39:05Z",
+  "original_session": "20260630-192000-add-a-deterministic-catalog-subcommand-to-scripts-foresight",
+  "task": "Add a deterministic catalog subcommand to scripts/foresight.py that reads .tdd/foresight/inventory/inventory.json and renders a UI-element + user-story catalog into inventory/inventory.md between idempotent <!-- foresight:catalog:start/end --> markers, grouped by feature, each element showing selector/role/behavior/user_story/source_refs/screenshot. Implement _element_completeness, build_catalog, _catalog_markdown_section, _inject_catalog_section, cmd_catalog; wire a catalog argparse subparser (--json, --fail-on-incomplete); add a UI catalog section to cmd_report. New inventory fields are optional; existing tests must still pass; core never calls an LLM. All new tests go in tests/test_catalog.py. Run command: pytest -q tests/test_catalog.py.",
+  "run_command": "python3 -m pytest -q tests/test_catalog.py",
+  "tests": [
+    {
+      "id": "T1",
+      "name": "test_catalog_lists_every_ui_element"
+    },
+    {
+      "id": "T2",
+      "name": "test_catalog_carries_new_fields"
+    },
+    {
+      "id": "T3",
+      "name": "test_catalog_flags_missing_user_story"
+    },
+    {
+      "id": "T4",
+      "name": "test_catalog_flags_missing_source_refs_and_screenshot"
+    },
+    {
+      "id": "T5",
+      "name": "test_catalog_complete_element_not_flagged"
+    },
+    {
+      "id": "T6",
+      "name": "test_catalog_completeness_counts"
+    },
+    {
+      "id": "T7",
+      "name": "test_cmd_catalog_fail_on_incomplete_exit1"
+    },
+    {
+      "id": "T8",
+      "name": "test_cmd_catalog_complete_corpus_exit0"
+    },
+    {
+      "id": "T9",
+      "name": "test_cmd_catalog_no_flag_exit0_despite_incomplete"
+    },
+    {
+      "id": "T10",
+      "name": "test_catalog_no_inventory_is_graceful"
+    },
+    {
+      "id": "T11",
+      "name": "test_catalog_injects_idempotent_section"
+    },
+    {
+      "id": "T12",
+      "name": "test_catalog_enriches_without_clobbering"
+    },
+    {
+      "id": "T13",
+      "name": "test_catalog_markdown_has_story_screenshot_sources"
+    },
+    {
+      "id": "T14",
+      "name": "test_catalog_grouped_by_feature"
+    },
+    {
+      "id": "T15",
+      "name": "test_report_includes_catalog_section"
+    }
+  ]
+}

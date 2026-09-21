@@ -1,0 +1,38 @@
+{
+  "files": [
+    ".github/agents/foresight-architect.agent.md",
+    ".github/agents/foresight-auditor.agent.md",
+    ".github/agents/foresight-cartographer.agent.md",
+    ".github/agents/foresight-mobile-explorer.agent.md",
+    ".github/agents/foresight-visual-inspector.agent.md",
+    ".github/agents/foresight-web-explorer.agent.md",
+    ".github/hooks/foresight.json",
+    ".github/instructions/foresight.instructions.md",
+    ".github/skills/foresight-audit/SKILL.md",
+    ".github/skills/foresight-catalog/SKILL.md",
+    ".github/skills/foresight-coverage/SKILL.md",
+    ".github/skills/foresight-propose/SKILL.md",
+    ".github/skills/foresight-reorg/SKILL.md",
+    ".github/skills/foresight-visual/SKILL.md",
+    ".github/skills/foresight/SKILL.md",
+    ".github/skills/foresight/reference/coverage-model.md",
+    ".github/skills/foresight/reference/exploration.md",
+    ".github/skills/foresight/reference/output-format.md",
+    ".github/skills/foresight/reference/regression-contract.md",
+    ".github/skills/foresight/reference/schemas/audit.schema.json",
+    ".github/skills/foresight/reference/schemas/catalog.schema.json",
+    ".github/skills/foresight/reference/schemas/coverage.schema.json",
+    ".github/skills/foresight/reference/schemas/inventory.schema.json",
+    ".github/skills/foresight/reference/schemas/overrides.schema.json",
+    ".github/skills/foresight/reference/schemas/reorg.schema.json",
+    ".github/skills/foresight/reference/schemas/ui-map.schema.json",
+    ".github/skills/foresight/reference/schemas/visual-baseline.schema.json",
+    ".github/skills/foresight/reference/schemas/visual.schema.json",
+    ".github/skills/foresight/scripts/copilot_session_start.py",
+    ".github/skills/foresight/scripts/foresight.py"
+  ],
+  "mcp_added": [
+    ".mcp.json",
+    ".vscode/mcp.json"
+  ]
+}

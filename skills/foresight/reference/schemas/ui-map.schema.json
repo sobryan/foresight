@@ -1,0 +1,78 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "foresight exploration/<ts>/<platform>/ui_map.json \u2014 one exploration run",
+  "type": "object",
+  "required": [
+    "platform",
+    "steps"
+  ],
+  "properties": {
+    "platform": {
+      "type": "string",
+      "enum": [
+        "web",
+        "android",
+        "ios"
+      ]
+    },
+    "target": {
+      "type": "string"
+    },
+    "explored_at_iso": {
+      "type": "string"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "n",
+          "screenshot"
+        ],
+        "properties": {
+          "n": {
+            "type": "integer"
+          },
+          "location": {
+            "type": "string"
+          },
+          "screenshot": {
+            "type": "string"
+          },
+          "use_case": {
+            "type": "string"
+          },
+          "elements": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "selector": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "behavior": {
+                  "type": "string"
+                },
+                "user_story": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

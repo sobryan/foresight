@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "foresight reorg/overrides.json \u2014 per-slug corrections to the reorg plan",
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "properties": {
+      "priority": {
+        "type": "string",
+        "enum": [
+          "critical",
+          "high",
+          "normal",
+          "low"
+        ]
+      },
+      "feature": {
+        "type": [
+          "string",
+          "array"
+        ],
+        "items": {
+          "type": "string"
+        }
+      },
+      "serial": {
+        "type": "boolean"
+      },
+      "reason": {
+        "type": "string"
+      }
+    }
+  }
+}

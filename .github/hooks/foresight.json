@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": "python3 .github/skills/foresight/scripts/copilot_session_start.py",
+        "cwd": ".",
+        "timeoutSec": 20
+      }
+    ]
+  }
+}

@@ -1,5 +1,14 @@
 # Visual UI-Element Inventory + User-Story Catalog (foresight "Job A" extension)
 
+> **Status (2026-09-20): implemented.** Part A (the `catalog` subcommand) shipped on
+> 2026-06-30 via `/tdd`. Part B (the `foresight-visual-inspector` agent, the
+> cartographer's `backfill` mode, the architect's user-story note, the SKILL phases,
+> `/foresight-catalog`, and the reference-doc updates) shipped on 2026-09-20 together
+> with two additions the plan did not foresee: `catalog` now requires the screenshot
+> file to exist (`screenshot_file` in `missing`), and a sibling `visual` subcommand
+> compares screenshots across runs so the captured images become a regression signal.
+> The rest of this document is the original plan, kept for the rationale.
+
 ## Context
 
 foresight's "Job A" (discovery) currently inventories UI elements from **code and the

@@ -1,0 +1,123 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "foresight inventory/catalog.json \u2014 UI element documentation completeness",
+  "type": "object",
+  "required": [
+    "generated_at_iso",
+    "project",
+    "inventory_present",
+    "summary",
+    "records",
+    "incomplete"
+  ],
+  "properties": {
+    "generated_at_iso": {
+      "type": "string"
+    },
+    "project": {
+      "type": "string"
+    },
+    "inventory_present": {
+      "type": "boolean"
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "n_features": {
+          "type": "integer"
+        },
+        "n_elements": {
+          "type": "integer"
+        },
+        "n_use_cases": {
+          "type": "integer"
+        },
+        "n_with_story": {
+          "type": "integer"
+        },
+        "n_with_source_refs": {
+          "type": "integer"
+        },
+        "n_with_screenshot": {
+          "type": "integer"
+        },
+        "n_complete": {
+          "type": "integer"
+        },
+        "n_incomplete": {
+          "type": "integer"
+        },
+        "completeness_pct": {
+          "type": "number"
+        }
+      }
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "feature",
+          "missing"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "feature": {
+            "type": "string"
+          },
+          "selector": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "behavior": {
+            "type": "string"
+          },
+          "use_case": {
+            "type": "string"
+          },
+          "user_story": {
+            "type": "string"
+          },
+          "source_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "screenshot": {
+            "type": "string"
+          },
+          "screenshot_exists": {
+            "type": "boolean"
+          },
+          "label": {
+            "type": "string"
+          },
+          "missing": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "user_story",
+                "source_refs",
+                "screenshot",
+                "screenshot_file"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "incomplete": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  }
+}

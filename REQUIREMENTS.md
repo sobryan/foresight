@@ -83,6 +83,28 @@ For every `.tdd/regression/<slug>/`, detect and report:
 2. Proposals are written under `.tdd/foresight/proposals/<slug>/` — **never** directly into `.tdd/regression/` (that remains iterative-tdd's job). The proposal is designed to be handed to `/tdd` to implement and to `/tdd-regression`/hindsight to replay thereafter.
 3. Each proposal cites the evidence that motivated it (the screenshot, the route, the uncovered use case).
 
+### FR-8 — Visual inspection and the UI catalog *(added 2026-09)*
+1. A visual-inspection agent walks an exploration run's screenshots and enumerates every visually distinct control, including ones the DOM/hierarchy pass missed.
+2. Each element gets a `user_story` (`As a <role>, I want <action> so that <benefit>`) and `visual` provenance (`screenshot`, `region`, `label`, `discovered_by`); the cartographer backfills `source_refs` (`file:line`) where the code can be found with confidence, omitting rather than guessing.
+3. The deterministic `catalog` command renders the elements into `inventory.md` (idempotent marker block) and `inventory/catalog.json`, and reports documentation completeness. A screenshot counts only if the file exists. `--fail-on-incomplete` is a CI gate.
+4. High-value stories feed the proposal path (FR-6) so visual inspection yields testable regressions.
+
+### FR-9 — Visual regression *(added 2026-09)*
+1. `visual --baseline` records the latest exploration run's screenshots (sha256 + dimensions) as `visual/baseline.json`.
+2. `visual` compares a run against the baseline, matching images by platform and screen slug (step numbers ignored), and classifies each as `unchanged`, `changed` (with the percent of pixels that differ, decoded in pure Python), `resized`, `new`, or `missing`. `--threshold` tolerates small differences; `--fail-on-change` is the CI gate.
+3. The report and the Copilot session hook surface the last comparison.
+
+### FR-10 — Validation and repair *(added 2026-09)*
+1. Every JSON artifact has a JSON-Schema file under `reference/schemas/`; `validate` checks the artifacts present and exits non-zero on problems. Agents run it after writing.
+2. `audit --fix-run-command` fills an empty `run_command` from the entry's own `## How to run the tests` section (fence-tolerant), with a backup, never overwriting a non-empty command.
+3. `reorg --apply` never overwrites `priority`/`feature`/`serial` values that are explicitly present unless named in `reorg/overrides.json` (the architect's corrections) or `--force`; it never writes an empty feature list.
+4. The coverage matcher never claims coverage from a plain-word literal match or from only two shared words; such items are reported as `weak` gaps. `sources`/`source_refs` that a test plan references count as coverage.
+
+### FR-11 — GitHub Copilot port *(added 2026-09)*
+1. `scripts/install_copilot.py` transforms the plugin into Copilot's formats: skills (`.github/skills/`, one per slash command plus the main skill, with the deterministic core and schemas inside the skill), custom agents (`.github/agents/*.agent.md`, tools mapped), a `sessionStart` hook, an instructions file scoped to `.tdd/**`, and the Playwright MCP server merged into `.mcp.json` / `.vscode/mcp.json`. `--user` installs to `~/.copilot/`.
+2. The web explorer has a Copilot-specific body that drives Playwright; on-disk output is identical so the deterministic core is unchanged.
+3. The install is idempotent, records a portable manifest, and supports `--dry-run` and `--uninstall`. CI verifies the dogfood install in this repo matches the Claude sources.
+
 ### FR-7 — Outputs for both machines and humans
 1. **Machine-readable JSON** for hindsight and other tooling: `inventory.json`, `coverage.json`, `audit.json`, `reorg.json` — stable schemas, documented in `skills/foresight/reference/output-format.md`.
 2. **Human-readable Markdown** reports for the same: an exploration summary, a coverage/gap report, an audit report, and a reorg plan.
@@ -198,13 +220,16 @@ foresight degrades gracefully: with none of the exploration tooling present it s
 
 ## 10. Acceptance criteria
 
-1. `foresight-audit` run against hindsight's own `.tdd/regression/` flags **every** entry as *not replayable* (empty `run_command`) — the concrete defect that exists today — and exits non-zero.
-2. `reorg --apply` adds `priority`/`feature`/`serial` to a `replay.json` without disturbing any existing key, is idempotent, and leaves a `.bak`.
-3. A generated proposal under `proposals/<slug>/` is structurally valid iterative-tdd regression content (`/tdd --regression <slug>` could consume it after promotion).
-4. `coverage` produces a gap report from static signals alone, and a richer one when `inventory.json` is present.
-5. The deterministic core imports only the standard library and runs under the same Python that runs `hindsight.py`.
-6. All four JSON outputs validate against the schemas documented in `reference/output-format.md`.
-7. The plugin installs and exposes its commands the same way iterative-tdd and hindsight do.
+1. `foresight-audit` run against a corpus with empty `run_command`s flags **every** such entry as *not replayable* and exits non-zero; `--fix-run-command` repairs the ones whose test plan declares the command (verified: 23 of 43 entries across this machine on 2026-09-20; foresight's own entry repaired).
+2. `reorg --apply` adds `priority`/`feature`/`serial` to a `replay.json` without disturbing any existing key, never overwrites an explicit value without an override or `--force`, is idempotent, and leaves a `.bak`.
+3. A generated proposal under `proposals/<slug>/` is structurally valid iterative-tdd regression content whose `test_plan.md` carries a `## How to run the tests` section iterative-tdd's extractor can read.
+4. `coverage` produces a gap report from static signals alone, and a richer one when `inventory.json` is present; a plain-word selector or two shared words never yields `covered`.
+5. The deterministic core imports only the standard library and runs under Python 3.8–3.13 (CI matrix).
+6. Every JSON output validates against its schema in `reference/schemas/` (`foresight.py validate`, exercised by the test suite).
+7. The plugin installs and exposes its commands the same way iterative-tdd and hindsight do; `claude plugin validate` passes.
+8. `visual` detects a one-pixel change between two runs of the same screen, tolerates changes under `--threshold`, and reports resized/new/missing screens.
+9. `catalog --fail-on-incomplete` exits non-zero when an element lacks a story, source refs, or an existing screenshot file.
+10. `install_copilot.py` produces skills/agents/hooks that reference no Claude-specific tool or path, is idempotent, and uninstalls cleanly.
 
 ---
 

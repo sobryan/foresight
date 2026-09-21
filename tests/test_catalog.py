@@ -29,6 +29,14 @@ def write_catalog_inventory(project: Path, features: list) -> None:
     path = project / ".tdd" / "foresight" / "inventory" / "inventory.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(inv, indent=2) + "\n")
+    # A screenshot only counts when the file exists: create the ones referenced.
+    for feature in features:
+        for el in feature.get("ui_elements", []):
+            shot = (el.get("visual") or {}).get("screenshot")
+            if shot:
+                shot_path = project / ".tdd" / "foresight" / shot
+                shot_path.parent.mkdir(parents=True, exist_ok=True)
+                shot_path.write_bytes(b"\x89PNG")
 
 
 def complete_el(**overrides) -> dict:

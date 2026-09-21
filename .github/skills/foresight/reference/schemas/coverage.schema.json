@@ -1,0 +1,148 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "foresight coverage.json \u2014 per-item coverage",
+  "type": "object",
+  "required": [
+    "generated_at_iso",
+    "project",
+    "inventory_present",
+    "summary",
+    "items"
+  ],
+  "properties": {
+    "generated_at_iso": {
+      "type": "string"
+    },
+    "project": {
+      "type": "string"
+    },
+    "inventory_present": {
+      "type": "boolean"
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "total",
+        "covered",
+        "weak",
+        "partial",
+        "uncovered"
+      ],
+      "properties": {
+        "total": {
+          "type": "integer"
+        },
+        "covered": {
+          "type": "integer"
+        },
+        "weak": {
+          "type": "integer"
+        },
+        "partial": {
+          "type": "integer"
+        },
+        "uncovered": {
+          "type": "integer"
+        }
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "feature",
+          "name",
+          "status",
+          "matched_tests",
+          "risk"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "feature": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "platform": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "use_case",
+              "ui_element"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "covered",
+              "weak",
+              "partial",
+              "uncovered"
+            ]
+          },
+          "matched_tests": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "weak_matches": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "risk": {
+            "type": "number"
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "match_reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "static": {
+      "type": "object",
+      "properties": {
+        "note": {
+          "type": "string"
+        },
+        "n_source_files": {
+          "type": "integer"
+        },
+        "n_regression_entries": {
+          "type": "integer"
+        },
+        "source_areas": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer"
+          }
+        },
+        "areas_with_no_regression_reference": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,131 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "foresight visual/visual.json \u2014 screenshot comparison against the baseline",
+  "type": "object",
+  "required": [
+    "generated_at_iso",
+    "project",
+    "baseline_present",
+    "summary",
+    "images"
+  ],
+  "properties": {
+    "generated_at_iso": {
+      "type": "string"
+    },
+    "project": {
+      "type": "string"
+    },
+    "baseline_present": {
+      "type": "boolean"
+    },
+    "baseline_run": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "run": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "threshold_pct": {
+      "type": "number"
+    },
+    "note": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer"
+        },
+        "unchanged": {
+          "type": "integer"
+        },
+        "changed": {
+          "type": "integer"
+        },
+        "resized": {
+          "type": "integer"
+        },
+        "new": {
+          "type": "integer"
+        },
+        "missing": {
+          "type": "integer"
+        }
+      }
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "key",
+          "status"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "unchanged",
+              "changed",
+              "resized",
+              "new",
+              "missing"
+            ]
+          },
+          "diff_pct": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "baseline_file": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "file": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "width": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "height": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "baseline_width": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "baseline_height": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

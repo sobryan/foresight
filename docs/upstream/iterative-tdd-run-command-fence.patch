@@ -1,0 +1,33 @@
+# Upstream fix for iterative-tdd: a bare ``` fence yields an empty run_command
+#
+# Symptom : entries saved by /tdd have "run_command": "" whenever the test plan's
+#           "## How to run the tests" section uses an untagged ``` fence, so hindsight
+#           and tdd_regression.py report them as no_run_command (silently never run).
+#           On 2026-09-20 this affected 23 of 43 entries across ~/Developer.
+# Cause   : _extract_run_command tests `startswith("`") and endswith("`")` before it
+#           skips fence lines; "```" satisfies that test and returns "".
+# Fix     : check for fence lines first. One reorder, no other behaviour change.
+# Apply   : cd ~/Developer/iterative-tdd && git apply -p1 <this file>
+#           then `claude plugin update iterative-tdd@iterative-tdd-marketplace`
+# Repair  : existing entries: `foresight.py audit --project <p> --fix-run-command`
+#
+diff --git a/scripts/tdd_session.py b/scripts/tdd_session.py
+index e3c2420..adecda2 100644
+--- a/scripts/tdd_session.py
++++ b/scripts/tdd_session.py
+@@ -184,10 +184,13 @@ def _extract_run_command(test_plan_path: Path) -> str:
+             stripped = line.strip()
+             if stripped.startswith("## "):
+                 break
+-            if stripped.startswith("`") and stripped.endswith("`") and len(stripped) > 2:
+-                return stripped.strip("`").strip()
++            # A fence line ("```" or "```bash") is never the command itself.
++            # Checking it BEFORE the inline-code test matters: a bare "```"
++            # starts and ends with a backtick, so the old order returned "".
+             if stripped.startswith("```") or not stripped:
+                 continue
++            if stripped.startswith("`") and stripped.endswith("`") and len(stripped) > 2:
++                return stripped.strip("`").strip()
+             return stripped
+     return ""
+ 

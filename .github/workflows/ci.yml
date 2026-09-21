@@ -1,0 +1,49 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests:
+    name: pytest (py${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install "pytest>=7"
+      - run: python -m pytest -q
+
+  corpus:
+    name: foresight audits its own corpus
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # The deterministic core is stdlib-only: nothing to install.
+      - name: audit (every entry must be replayable)
+        run: python3 scripts/foresight.py audit --project . --verbose
+      - name: validate artifacts against their schemas
+        run: python3 scripts/foresight.py validate --project . --verbose
+      - name: replay the regression entries
+        run: |
+          set -e
+          for replay in .tdd/regression/*/replay.json; do
+            cmd=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['run_command'])" "$replay")
+            echo "▶ $replay: $cmd"
+            python3 -m pip install -q "pytest>=7"
+            bash -c "$cmd"
+          done
+      - name: copilot port stays in sync with the Claude sources
+        run: |
+          python3 scripts/install_copilot.py --target .
+          git diff --exit-code -- .github .mcp.json .vscode/mcp.json
